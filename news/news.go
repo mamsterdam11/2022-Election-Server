@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"net/url"
 	"strings"
@@ -17,11 +18,9 @@ const (
 
 	finnhubNewsURL     = "https://finnhub.io/api/v1/company-news"
 	finnHubTokenHeader = "X-Finnhub-Token"
-	apiToken           = "cdgr05qad3i2r375f74gcdgr05qad3i2r375f750"
-	apiDateFormat      = "2006-01-02"
-	snowflakeTicker    = "SNOW"
-
-	newsDatetimeFormat = "January, 2 2006 15:04PM"
+	// free to use API token, normally would load this from disk or other secure method
+	apiToken        = "cdgr05qad3i2r375f74gcdgr05qad3i2r375f750"
+	snowflakeTicker = "SNOW"
 )
 
 // News represents a news story in the Finnhub format,
@@ -42,8 +41,8 @@ type News struct {
 type NewsCollector struct {
 	client *http.Client
 
-	cache []News
-	sync.RWMutex
+	cache        []News
+	sync.RWMutex // protects cache
 }
 
 func NewNewsCollector() *NewsCollector {
@@ -84,31 +83,31 @@ func (c *NewsCollector) RecentNews(n int) []News {
 func (c *NewsCollector) collect() {
 	req, err := buildNewsRequest()
 	if err != nil {
-		fmt.Printf("Failed to build request: %s\n", err.Error())
+		log.Printf("Failed to build request: %s\n", err.Error())
 		return
 	}
 
 	resp, err := c.client.Do(req)
 	if err != nil {
-		fmt.Printf("Failed to execute request %v: %v\n", req, err)
+		log.Printf("Failed to execute request %v: %v\n", req, err)
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != 200 {
-		fmt.Printf("Got unexpected response status code: %d: %v \n", resp.StatusCode, resp)
+		log.Printf("Got unexpected response status code: %d: %v \n", resp.StatusCode, resp)
 		return
 	}
 
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		fmt.Printf("Failed to read response body: %v\n", err)
+		log.Printf("Failed to read response body: %v\n", err)
 		return
 	}
 
 	var newsStories []News
 	err = json.Unmarshal(body, &newsStories)
 	if err != nil {
-		fmt.Printf("Failed to unmarshal response body %s: %v\n", string(body), err)
+		log.Printf("Failed to unmarshal response body %s: %v\n", string(body), err)
 		return
 	}
 
@@ -139,7 +138,12 @@ func (c *NewsCollector) setCache(newsStories []News) {
 	c.cache = newsStories
 }
 
+// lastThreeDayRange returns from, to dates in YYYY-MM-DD
+// format. The to date is today's date (local time), and the
+// from date is 3 days ago (local time).
 func lastThreeDayRange() (string, string) {
+	apiDateFormat := "2006-01-02"
+
 	from := time.Now().Add(-time.Hour * 24 * 3).Format(apiDateFormat)
 	to := time.Now().Format(apiDateFormat)
 
@@ -169,7 +173,9 @@ func FormatNews(news []News) string {
 	return sb.String()
 }
 
+// Parse unix datetime into pretty formatted date string
 func parseDatetime(unixTime int64) string {
+	newsDatetimeFormat := "January, 2 2006 15:04PM"
 	t := time.Unix(unixTime, 0)
 
 	return t.Format(newsDatetimeFormat)

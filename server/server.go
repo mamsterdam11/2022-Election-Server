@@ -10,11 +10,10 @@ import (
 )
 
 const (
-	serverAddr = ":8282"
+	serverAddr   = ":8282"
+	shutdownTime = 10 * time.Second // max time waiting for server to shutdown
 
 	recentNewsCount = 3 // number of recent news stories to provide
-
-	shutdownTime = 10 * time.Second // maximum time waiting for server to shutdown
 )
 
 type WebServer struct {
