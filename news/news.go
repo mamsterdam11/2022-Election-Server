@@ -19,7 +19,7 @@ const (
 	finnHubTokenHeader = "X-Finnhub-Token"
 	apiToken           = "cdgr05qad3i2r375f74gcdgr05qad3i2r375f750"
 	apiDateFormat      = "2006-01-02"
-	snowflakeTicker    = "AAPL"
+	snowflakeTicker    = "SNOW"
 
 	newsDatetimeFormat = "January, 2 2006 15:04PM"
 )
