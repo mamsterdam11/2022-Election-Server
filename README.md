@@ -4,12 +4,12 @@ Run a server that presents recent Snowflake news stories.
 
 ## Getting Started
 
-Simply run:
+Run:
 ```
 $ go run main.go
 ```
 
-Next, simply make a GET request to `localhost:8282/news`, and you'll receive recent news stories about Snowflake!
+Next, make a GET request to `localhost:8282/news`, and you'll receive recent news stories about Snowflake!
 
 Example:
 ```
