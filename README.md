@@ -7,6 +7,7 @@ Run a server that presents recent Snowflake news stories.
 Run:
 ```
 $ go run main.go
+2022/11/03 10:00:00 Server listening on :8282
 ```
 
 Next, make a GET request to `localhost:8282/news`, and you'll receive recent news stories about Snowflake!
